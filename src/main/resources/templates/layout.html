@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${title} ?: 'TechCorp Employee System'">TechCorp Employee System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="/css/style.css" />
+</head>
+<body>
+<header class="site-header">
+    <div class="container">
+        <h1 class="brand">TechCorp</h1>
+        <nav class="main-nav">
+            <ul>
+                <li><a th:href="@{/employees}">Pracownicy</a></li>
+                <li><a th:href="@{/departments}">Departamenty</a></li>
+                <li><a th:href="@{/statistics}">Statystyki</a></li>
+                <li><a th:href="@{/employees/import}">Import</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <div th:insert="${content}">
+        <section class="hero">
+            <h2>Witamy w systemie zarządzania pracownikami</h2>
+            <p>Wybierz jedną z pozycji w menu, aby rozpocząć.</p>
+        </section>
+    </div>
+</main>
+
+<footer class="site-footer">
+    <div class="container">
+        <small>&copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2025</span> TechCorp</small>
+    </div>
+</footer>
+
+</body>
+</html>

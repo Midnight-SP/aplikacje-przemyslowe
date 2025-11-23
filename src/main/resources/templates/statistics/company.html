@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::section})">
+<section>
+    <h2>Statystyki firmy: <span th:text="${companyName}">Company</span></h2>
+
+    <div class="meta">
+    <p><strong>Liczba pracowników:</strong> <span th:text="${stats != null ? stats.employeeCount : 0}">0</span></p>
+    <p><strong>Średnie wynagrodzenie:</strong> <span th:text="${stats != null ? #numbers.formatDecimal(stats.averageSalary,1,'COMMA',2,'POINT') : '0.00'}">0.00</span></p>
+    <p><strong>Najwyżej opłacowany:</strong> <span th:text="${stats != null ? stats.highestPaidEmployee : '-'}">-</span></p>
+    </div>
+
+    <h3>Pracownicy</h3>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Imię</th>
+                <th>Email</th>
+                <th>Stanowisko</th>
+                <th>Wynagrodzenie</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="e : ${employees}">
+                <td th:text="${e.fullName}">Jan Kowalski</td>
+                <td th:text="${e.email}">jan@example.com</td>
+                <td th:text="${e.position}">MANAGER</td>
+                <td th:text="${#numbers.formatDecimal(e.salary,1,'COMMA',2,'POINT')}">6000.00</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(employees)}">
+                <td colspan="4" class="muted">Brak pracowników</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="form-actions">
+        <a class="btn" th:href="@{/statistics}">Powrót</a>
+    </div>
+</section>
+</html>

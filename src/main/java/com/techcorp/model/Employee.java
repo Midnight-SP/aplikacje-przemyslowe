@@ -1,15 +1,31 @@
 package com.techcorp.model;
 
 import java.util.Objects;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
 public class Employee {
+    @NotBlank(message = "Imię i nazwisko jest wymagane")
     private String fullName;
+
+    @NotBlank(message = "Email jest wymagany")
+    @Email(message = "Nieprawidłowy format adresu email")
     private String email;
+
+    @NotBlank(message = "Nazwa firmy jest wymagana")
     private String companyName;
+
+    @NotNull(message = "Stanowisko jest wymagane")
     private Position position;
+
+    @PositiveOrZero(message = "Wynagrodzenie nie może być ujemne")
     private double salary;
+
     private String photoFileName;
     private EmploymentStatus status;
+    private Long departmentId;
 
     public Employee(String fullName, String email, String companyName, Position position, double salary) {
         this.fullName = Objects.requireNonNull(fullName, "fullName");
@@ -21,6 +37,10 @@ public class Employee {
         }
         this.salary = salary;
         this.status = EmploymentStatus.ACTIVE;
+    }
+
+    // no-arg constructor for frameworks and binding
+    public Employee() {
     }
 
     public String getFullName() {
@@ -76,6 +96,14 @@ public class Employee {
 
     public void setPhotoFileName(String photoFileName) {
         this.photoFileName = photoFileName;
+    }
+
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
     }
 
     public String getLastName() {

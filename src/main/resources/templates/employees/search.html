@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::section})">
+<section>
+    <h2>Wyszukiwanie pracowników po firmie</h2>
+
+    <form th:action="@{/employees/search}" method="post">
+        <div class="form-row">
+            <label>Nazwa firmy</label>
+            <input type="text" name="company" th:value="${query}" />
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn">Szukaj</button>
+            <a class="btn secondary" th:href="@{/employees}">Powrót</a>
+        </div>
+    </form>
+</section>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::section})">
+<section>
+    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between">
+        <h2>Dokumenty departamentu: <span th:text="${department.name}">Dept</span></h2>
+        <div>
+            <a class="btn" th:href="@{/departments}">Powrót</a>
+        </div>
+    </div>
+
+    <div class="flash-messages">
+        <div th:if="${message}" class="flash success" th:text="${message}"></div>
+        <div th:if="${error}" class="flash error" th:text="${error}"></div>
+    </div>
+
+    <h3>Prześlij nowy dokument</h3>
+    <form th:action="@{${action}}" method="post" enctype="multipart/form-data">
+        <div class="form-row">
+            <label>Plik</label>
+            <input type="file" name="file" required />
+        </div>
+        <div class="form-row">
+            <label>Typ</label>
+            <select name="type">
+                <option value="CONTRACT">CONTRACT</option>
+                <option value="CERTIFICATE">CERTIFICATE</option>
+                <option value="ID_CARD">ID_CARD</option>
+                <option value="OTHER" selected>OTHER</option>
+            </select>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn">Prześlij</button>
+        </div>
+    </form>
+
+    <h3>Lista dokumentów</h3>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Nazwa pliku</th>
+                <th>Typ</th>
+                <th>Wgrano</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="doc : ${documents}">
+                <td th:text="${doc.originalFileName}">plik.pdf</td>
+                <td th:text="${doc.type}">CONTRACT</td>
+                <td th:text="${#dates.format(doc.uploadedAt, 'yyyy-MM-dd HH:mm')}">2025-01-01</td>
+                <td>
+                    <a th:href="@{/api/files/documents/{email}/{documentId}(email=${'department-' + department.id},documentId=${doc.id})}">Pobierz</a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(documents)}">
+                <td colspan="4" class="muted">Brak dokumentów</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+</html>

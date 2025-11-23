@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::section})">
+<section>
+    <h2 th:text="${employee.email} == null ? 'Dodaj pracownika' : 'Edytuj pracownika'"></h2>
+
+    <div class="flash-messages">
+        <div th:if="${message}" class="flash success" th:text="${message}"></div>
+        <div th:if="${error}" class="flash error" th:text="${error}"></div>
+    </div>
+
+    <form th:action="@{${action}}" th:object="${employee}" method="post">
+        <div class="form-row">
+            <label>Imię i nazwisko</label>
+            <input type="text" th:field="*{fullName}" required />
+        </div>
+        <div class="form-row">
+            <label>Email</label>
+            <input type="email" th:field="*{email}" required />
+        </div>
+        <div class="form-row">
+            <label>Firma</label>
+            <input type="text" th:field="*{companyName}" />
+        </div>
+        <div class="form-row">
+            <label>Stanowisko</label>
+            <select th:field="*{position}">
+                <option th:each="p : ${positions}" th:value="${p}" th:text="${p}"></option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label>Status zatrudnienia</label>
+            <select th:field="*{status}">
+                <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"></option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label>Wynagrodzenie</label>
+            <input type="number" step="0.01" th:field="*{salary}" />
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn">Zapisz</button>
+            <a class="btn secondary" th:href="@{/employees}">Anuluj</a>
+        </div>
+    </form>
+</section>
+</html>

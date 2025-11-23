@@ -37,6 +37,10 @@ dependencies {
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    // Thymeleaf template engine for MVC views
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    // Jakarta Bean Validation (JSR 380) support for @Valid and constraint annotations
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.apache.pdfbox:pdfbox:2.0.27'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

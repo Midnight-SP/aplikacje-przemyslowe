@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::section})">
+<section>
+    <h2>Dodaj nowego pracownika</h2>
+
+    <div class="flash-messages">
+        <div th:if="${message}" class="flash success" th:text="${message}"></div>
+        <div th:if="${error}" class="flash error" th:text="${error}"></div>
+    </div>
+
+    <form th:action="@{/employees/add}" th:object="${employee}" method="post">
+        <div th:if="${#fields.hasAnyErrors()}" class="flash error">
+            <p>Wystąpiły błędy w formularzu. Sprawdź pola poniżej.</p>
+        </div>
+
+        <div class="form-row">
+            <label>Imię i nazwisko</label>
+            <input type="text" th:field="*{fullName}" required />
+            <div class="field-error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+        </div>
+
+        <div class="form-row">
+            <label>Email</label>
+            <input type="email" th:field="*{email}" required />
+            <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+        </div>
+
+        <div class="form-row">
+            <label>Firma</label>
+            <input type="text" th:field="*{companyName}" />
+            <div class="field-error" th:if="${#fields.hasErrors('companyName')}" th:errors="*{companyName}"></div>
+        </div>
+        <div class="form-row">
+            <label>Stanowisko</label>
+            <select th:field="*{position}">
+                <option th:each="pos : ${positions}" th:value="${pos}" th:text="${pos}"></option>
+            </select>
+            <div class="field-error" th:if="${#fields.hasErrors('position')}" th:errors="*{position}"></div>
+        </div>
+        <div class="form-row">
+            <label>Status zatrudnienia</label>
+            <select th:field="*{status}">
+                <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"></option>
+            </select>
+            <div class="field-error" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></div>
+        </div>
+        <div class="form-row">
+            <label>Wynagrodzenie</label>
+            <input type="number" step="0.01" th:field="*{salary}" />
+            <div class="field-error" th:if="${#fields.hasErrors('salary')}" th:errors="*{salary}"></div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn">Dodaj</button>
+            <a class="btn secondary" th:href="@{/employees}">Anuluj</a>
+        </div>
+    </form>
+</section>
+</html>

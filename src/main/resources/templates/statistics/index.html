@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::section})">
+<section>
+    <h2>Statystyki</h2>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Łącznie pracowników</h3>
+            <p th:text="${totalEmployees}">0</p>
+        </div>
+        <div class="card">
+            <h3>Średnie wynagrodzenie</h3>
+            <p th:text="${#numbers.formatDecimal(averageSalary,1,'COMMA',2,'POINT')}">0.00</p>
+        </div>
+        <div class="card">
+            <h3>Liczba departamentów</h3>
+            <p th:text="${totalDepartments}">0</p>
+        </div>
+    </div>
+
+    <h3>Statystyki per firma</h3>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Firma</th>
+                <th>Liczba pracowników</th>
+                <th>Średnia płaca</th>
+                <th>Najwyżej opłacony</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="entry : ${companyStats}">
+                <td th:text="${entry.key}">TechCorp</td>
+                <td th:text="${entry.value.employeeCount}">10</td>
+                <td th:text="${#numbers.formatDecimal(entry.value.averageSalary,1,'COMMA',2,'POINT')}">0.00</td>
+                <td th:text="${entry.value.highestPaidEmployee}">Jan Kowalski</td>
+                <td><a th:href="@{/statistics/company/{name}(name=${entry.key})}">Szczegóły</a></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(companyStats)}">
+                <td colspan="5" class="muted">Brak danych</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Rozkład pracowników po stanowiskach</h3>
+    <ul>
+        <li th:each="entry : ${positionDistribution}">
+            <strong th:text="${entry.key}">POSITION</strong>: <span th:text="${entry.value}">0</span>
+        </li>
+    </ul>
+
+</section>
+</html>

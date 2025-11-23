@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::section})">
+<section>
+    <h2 th:text="${department.name}">Departament</h2>
+
+    <div class="meta">
+        <p><strong>Lokalizacja:</strong> <span th:text="${department.location}">Warszawa</span></p>
+        <p><strong>Budżet:</strong> <span th:text="${#numbers.formatDecimal(department.budget, 1, 'COMMA', 2, 'POINT')}">100000</span></p>
+        <p><strong>Manager:</strong> <span th:text="${managerName}">Jan Kowalski</span></p>
+    </div>
+
+    <h3>Pracownicy w departamencie</h3>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Imię</th>
+                <th>Email</th>
+                <th>Stanowisko</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="m : ${members}">
+                <td th:text="${m.fullName}">Jan Kowalski</td>
+                <td th:text="${m.email}">jan@example.com</td>
+                <td th:text="${m.position}">MANAGER</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(members)}">
+                <td colspan="3" class="muted">Brak pracowników przypisanych do tego departamentu</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="form-actions">
+        <a class="btn" th:href="@{/departments}">Powrót</a>
+    </div>
+</section>
+</html>

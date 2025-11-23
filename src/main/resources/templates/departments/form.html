@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::section})">
+<section>
+    <h2 th:text="${department.id} == null ? 'Dodaj departament' : 'Edytuj departament'"></h2>
+
+    <div class="flash-messages">
+        <div th:if="${message}" class="flash success" th:text="${message}"></div>
+        <div th:if="${error}" class="flash error" th:text="${error}"></div>
+    </div>
+
+    <form th:action="@{${action}}" th:object="${department}" method="post">
+        <input type="hidden" th:if="${department.id}" th:field="*{id}" />
+        <div class="form-row">
+            <label>Nazwa</label>
+            <input type="text" th:field="*{name}" required />
+        </div>
+        <div class="form-row">
+            <label>Lokalizacja</label>
+            <input type="text" th:field="*{location}" required />
+        </div>
+        <div class="form-row">
+            <label>Budżet</label>
+            <input type="number" step="0.01" th:field="*{budget}" required />
+        </div>
+        <div class="form-row">
+            <label>Manager</label>
+            <select th:field="*{managerEmail}">
+                <option th:each="m : ${managers}" th:value="${m.email}" th:text="${m.fullName + ' (' + m.email + ')'}"></option>
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn" th:text="${department.id} == null ? 'Dodaj' : 'Zapisz'"></button>
+            <a class="btn secondary" th:href="@{/departments}">Anuluj</a>
+        </div>
+    </form>
+</section>
+</html>

@@ -1,0 +1,63 @@
+/* Basic layout */
+:root{
+  --max-width:1100px;
+  --accent:#2c6fb7;
+  --muted:#6c757d;
+  --success:#1e7e34;
+  --danger:#c82333;
+}
+body{
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  margin:0;
+  padding:0;
+  background:#f7f9fb;
+  color:#222;
+}
+.container{
+  max-width:var(--max-width);
+  margin:28px auto;
+  padding:0 16px;
+}
+.site-header{
+  background:var(--accent);
+  color:white;
+  padding:12px 0;
+}
+.site-header .container{display:flex;align-items:center;justify-content:space-between}
+.brand{margin:0;font-size:1.25rem}
+.main-nav ul{list-style:none;margin:0;padding:0;display:flex;gap:12px}
+.main-nav a{color:white;text-decoration:none;padding:6px 8px;border-radius:4px}
+.main-nav a:hover{background:rgba(255,255,255,0.12)}
+
+.site-footer{padding:12px 0;background:#fff;border-top:1px solid #eee}
+
+/* Tables */
+.styled-table{width:100%;border-collapse:collapse;margin:12px 0;background:#fff;border:1px solid #e1e8f0}
+.styled-table thead th{background:#f1f5f9;padding:10px;border-bottom:1px solid #e6eef6;text-align:left}
+.styled-table tbody td{padding:10px;border-bottom:1px solid #f0f6fb}
+.styled-table tbody tr:hover{background:linear-gradient(90deg, rgba(44,111,183,0.04), rgba(44,111,183,0.02));}
+.styled-table tbody tr:nth-child(even){background:#fcfeff}
+.muted{color:var(--muted);text-align:center;padding:18px}
+
+/* Forms */
+form .form-row{display:flex;flex-direction:column;margin-bottom:12px}
+input[type=text], input[type=email], input[type=number], select, textarea{
+  padding:8px; border:1px solid #cfdbe9; border-radius:6px; background:white; font-size:0.95rem;
+  box-shadow: inset 0 1px 0 rgba(0,0,0,0.02);
+}
+input:focus, select:focus, textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(44,111,183,0.08)}
+
+.btn{display:inline-block;padding:8px 12px;background:var(--accent);color:white;text-decoration:none;border-radius:6px}
+.btn.secondary{background:#6c757d}
+.form-actions{margin-top:12px}
+
+/* Flash messages */
+.flash{padding:10px;margin-bottom:12px;border-radius:6px}
+.flash.success{background:rgba(30,126,52,0.08);border:1px solid rgba(30,126,52,0.18);color:var(--success)}
+.flash.error{background:rgba(200,35,51,0.06);border:1px solid rgba(200,35,51,0.12);color:var(--danger)}
+
+/* Responsive */
+@media (max-width:720px){
+  .main-nav ul{flex-direction:column;gap:6px}
+  .site-header .container{flex-direction:column;align-items:flex-start;gap:8px}
+}
