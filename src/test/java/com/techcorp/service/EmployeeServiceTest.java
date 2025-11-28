@@ -1,25 +1,69 @@
 package com.techcorp.service;
 
+import com.techcorp.dao.EmployeeDAO;
 import com.techcorp.exception.DuplicateEmailException;
 import com.techcorp.model.Employee;
 import com.techcorp.model.Position;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest {
     
+    @Mock
+    private EmployeeDAO employeeDAO;
+    
     private EmployeeService employeeService;
+    private List<Employee> testEmployees;
     
     @BeforeEach
     void setUp() {
-        employeeService = new EmployeeService();
+        testEmployees = new ArrayList<>();
+        
+        // Configure mock to simulate in-memory storage (lenient to avoid unnecessary stubbing warnings)
+        lenient().when(employeeDAO.findAll()).thenAnswer(invocation -> new ArrayList<>(testEmployees));
+        
+        lenient().when(employeeDAO.findByEmail(any(String.class))).thenAnswer(invocation -> {
+            String email = invocation.getArgument(0);
+            return testEmployees.stream()
+                .filter(e -> e.getEmail().equalsIgnoreCase(email))
+                .findFirst();
+        });
+        
+        lenient().doAnswer(invocation -> {
+            Employee employee = invocation.getArgument(0);
+            // Remove existing employee with same email (case-insensitive)
+            testEmployees.removeIf(e -> e.getEmail().equalsIgnoreCase(employee.getEmail()));
+            // Add new employee
+            testEmployees.add(employee);
+            return null;
+        }).when(employeeDAO).save(any(Employee.class));
+        
+        lenient().doAnswer(invocation -> {
+            String email = invocation.getArgument(0);
+            testEmployees.removeIf(e -> e.getEmail().equalsIgnoreCase(email));
+            return null;
+        }).when(employeeDAO).delete(any(String.class));
+        
+        lenient().doAnswer(invocation -> {
+            testEmployees.clear();
+            return null;
+        }).when(employeeDAO).deleteAll();
+        
+        employeeService = new EmployeeService(employeeDAO);
     }
     
     @Test

@@ -1,5 +1,6 @@
 package com.techcorp;
 
+import com.techcorp.dao.EmployeeDAO;
 import com.techcorp.exception.ApiException;
 import com.techcorp.model.CompanyStatistics;
 import com.techcorp.model.Employee;
@@ -9,28 +10,71 @@ import com.techcorp.service.EmployeeService;
 import com.techcorp.service.ImportService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class IntegrationTest {
+    
+    @Mock
+    private EmployeeDAO employeeDAO;
     
     private EmployeeService employeeService;
     private ImportService importService;
     private ApiService apiService;
+    private List<Employee> testEmployees;
     
     @TempDir
     Path tempDir;
     
     @BeforeEach
     void setUp() {
-        employeeService = new EmployeeService();
+        testEmployees = new ArrayList<>();
+        
+        // Configure mock to simulate in-memory storage (lenient to avoid unnecessary stubbing warnings)
+        lenient().when(employeeDAO.findAll()).thenAnswer(invocation -> new ArrayList<>(testEmployees));
+        
+        lenient().when(employeeDAO.findByEmail(any(String.class))).thenAnswer(invocation -> {
+            String email = invocation.getArgument(0);
+            return testEmployees.stream()
+                .filter(e -> e.getEmail().equalsIgnoreCase(email))
+                .findFirst();
+        });
+        
+        lenient().doAnswer(invocation -> {
+            Employee employee = invocation.getArgument(0);
+            // Remove existing employee with same email (case-insensitive)
+            testEmployees.removeIf(e -> e.getEmail().equalsIgnoreCase(employee.getEmail()));
+            // Add new employee
+            testEmployees.add(employee);
+            return null;
+        }).when(employeeDAO).save(any(Employee.class));
+        
+        lenient().doAnswer(invocation -> {
+            String email = invocation.getArgument(0);
+            testEmployees.removeIf(e -> e.getEmail().equalsIgnoreCase(email));
+            return null;
+        }).when(employeeDAO).delete(any(String.class));
+        
+        lenient().doAnswer(invocation -> {
+            testEmployees.clear();
+            return null;
+        }).when(employeeDAO).deleteAll();
+        
+        employeeService = new EmployeeService(employeeDAO);
         importService = new ImportService(employeeService);
         apiService = new ApiService();
     }

@@ -41,6 +41,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     // Jakarta Bean Validation (JSR 380) support for @Valid and constraint annotations
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // Spring JDBC for database access
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    // H2 in-memory database
+    runtimeOnly 'com.h2database:h2'
     implementation 'org.apache.pdfbox:pdfbox:2.0.27'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

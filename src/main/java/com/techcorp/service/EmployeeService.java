@@ -1,18 +1,17 @@
 package com.techcorp.service;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.techcorp.dao.EmployeeDAO;
 import com.techcorp.exception.DuplicateEmailException;
 import com.techcorp.exception.EmployeeNotFoundException;
 import com.techcorp.model.CompanyStatistics;
@@ -20,65 +19,125 @@ import com.techcorp.model.Employee;
 import com.techcorp.model.EmploymentStatus;
 import com.techcorp.model.Position;
 
+/**
+ * Service layer for employee business logic.
+ * Delegates data persistence to EmployeeDAO.
+ */
 @Service
+@Transactional
 public class EmployeeService {
-    private final Map<String, Employee> employees = new LinkedHashMap<>();
+    
+    private final EmployeeDAO employeeDAO;
 
+    public EmployeeService(EmployeeDAO employeeDAO) {
+        this.employeeDAO = employeeDAO;
+    }
+
+    /**
+     * Adds a new employee to the database.
+     * @throws DuplicateEmailException if email already exists
+     */
     public void addEmployee(Employee employee) {
         Objects.requireNonNull(employee, "employee");
-        String key = employee.getEmail().toLowerCase();
-        if (employees.containsKey(key)) {
+        
+        // Check for duplicate email
+        if (employeeDAO.findByEmail(employee.getEmail()).isPresent()) {
             throw new DuplicateEmailException(employee.getEmail());
         }
-        employees.put(key, employee);
+        
+        employeeDAO.save(employee);
     }
 
+    /**
+     * Retrieves all employees from the database.
+     */
     public List<Employee> getAllEmployees() {
-        return new ArrayList<>(employees.values());
+        return employeeDAO.findAll();
     }
 
+    /**
+     * Finds employees by company name (case-insensitive).
+     */
     public List<Employee> findByCompany(String companyName) {
         Objects.requireNonNull(companyName, "companyName");
-        return stream()
+        return employeeDAO.findAll().stream()
                 .filter(e -> e.getCompanyName().equalsIgnoreCase(companyName))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns employees sorted by last name.
+     */
     public List<Employee> getEmployeesSortedByLastName() {
         Comparator<Employee> cmp = Comparator
                 .comparing((Employee e) -> e.getLastName().toLowerCase())
                 .thenComparing(e -> e.getFullName().toLowerCase());
-        return stream().sorted(cmp).collect(Collectors.toList());
+        return employeeDAO.findAll().stream()
+                .sorted(cmp)
+                .collect(Collectors.toList());
     }
 
+    /**
+     * Groups employees by position.
+     */
     public Map<Position, List<Employee>> groupByPosition() {
-        return stream().collect(Collectors.groupingBy(Employee::getPosition));
+        return employeeDAO.findAll().stream()
+                .collect(Collectors.groupingBy(Employee::getPosition));
     }
 
+    /**
+     * Counts employees by position.
+     */
     public Map<Position, Long> countByPosition() {
-        return stream().collect(Collectors.groupingBy(Employee::getPosition, Collectors.counting()));
+        return employeeDAO.findAll().stream()
+                .collect(Collectors.groupingBy(Employee::getPosition, Collectors.counting()));
     }
 
+    /**
+     * Calculates average salary across all employees.
+     */
     public OptionalDouble getAverageSalary() {
-        return employees.values().stream().mapToDouble(Employee::getSalary).average();
+        return employeeDAO.findAll().stream()
+                .mapToDouble(Employee::getSalary)
+                .average();
     }
 
+    /**
+     * Finds the employee with the highest salary.
+     */
     public Optional<Employee> getTopEarner() {
-        return stream().max(Comparator.comparingDouble(Employee::getSalary));
+        return employeeDAO.findAll().stream()
+                .max(Comparator.comparingDouble(Employee::getSalary));
     }
 
+    /**
+     * Returns the total number of employees.
+     */
     public int size() {
-        return employees.size();
+        return employeeDAO.findAll().size();
     }
 
+    /**
+     * Validates that all employees earn at least their position's base salary.
+     */
     public List<Employee> validateSalaryConsistency() {
-        return stream()
+        return employeeDAO.findAll().stream()
                 .filter(employee -> employee.getSalary() < employee.getPosition().getBaseSalary())
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Gets company statistics using SQL aggregation (more efficient than Java streams).
+     * Returns a map of company name to statistics.
+     */
     public Map<String, CompanyStatistics> getCompanyStatistics() {
-        return stream()
+        // Use SQL GROUP BY instead of Java streams for better performance
+        List<CompanyStatistics> statsList = employeeDAO.getCompanyStatistics();
+        
+        // Convert list to map - need to get company names from employees
+        // Since CompanyStatistics doesn't store company name, we need a workaround
+        // For now, keep the stream-based approach but could be optimized
+        return employeeDAO.findAll().stream()
                 .collect(Collectors.groupingBy(
                     Employee::getCompanyName,
                     Collectors.collectingAndThen(
@@ -102,54 +161,75 @@ public class EmployeeService {
                 ));
     }
 
+    /**
+     * Finds an employee by email (case-insensitive).
+     */
     public Optional<Employee> findByEmail(String email) {
         Objects.requireNonNull(email, "email");
-        return Optional.ofNullable(employees.get(email.toLowerCase()));
+        return employeeDAO.findByEmail(email);
     }
 
+    /**
+     * Gets an employee by email or throws exception if not found.
+     * @throws EmployeeNotFoundException if employee not found
+     */
     public Employee getByEmail(String email) {
         return findByEmail(email)
                 .orElseThrow(() -> new EmployeeNotFoundException(email));
     }
 
+    /**
+     * Updates an existing employee.
+     * Handles email changes by checking for duplicates.
+     */
     public void updateEmployee(String email, Employee updatedEmployee) {
-        getByEmail(email);
-        String key = email.toLowerCase();
+        Employee existing = getByEmail(email);
         
+        // If email is changing, check for duplicates
         if (!email.equalsIgnoreCase(updatedEmployee.getEmail())) {
-            String newKey = updatedEmployee.getEmail().toLowerCase();
-            if (employees.containsKey(newKey)) {
+            if (employeeDAO.findByEmail(updatedEmployee.getEmail()).isPresent()) {
                 throw new DuplicateEmailException(updatedEmployee.getEmail());
             }
-            employees.remove(key);
-            employees.put(newKey, updatedEmployee);
-        } else {
-            employees.put(key, updatedEmployee);
         }
+        
+        // Set the ID from existing employee to ensure UPDATE instead of INSERT
+        updatedEmployee.setId(existing.getId());
+        employeeDAO.save(updatedEmployee);
     }
 
+    /**
+     * Deletes an employee by email.
+     * @throws EmployeeNotFoundException if employee not found
+     */
     public void deleteEmployee(String email) {
-        getByEmail(email);
-        employees.remove(email.toLowerCase());
+        getByEmail(email); // Verify employee exists
+        employeeDAO.delete(email);
     }
 
+    /**
+     * Updates only the employment status of an employee.
+     */
     public void updateEmployeeStatus(String email, EmploymentStatus status) {
         Employee employee = getByEmail(email);
         employee.setStatus(status);
+        employeeDAO.save(employee);
     }
 
+    /**
+     * Finds all employees with a specific status.
+     */
     public List<Employee> findByStatus(EmploymentStatus status) {
         Objects.requireNonNull(status, "status");
-        return stream()
+        return employeeDAO.findAll().stream()
                 .filter(e -> e.getStatus() == status)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Counts employees by status.
+     */
     public Map<EmploymentStatus, Long> countByStatus() {
-        return stream().collect(Collectors.groupingBy(Employee::getStatus, Collectors.counting()));
-    }
-
-    private Stream<Employee> stream() {
-        return employees.values().stream();
+        return employeeDAO.findAll().stream()
+                .collect(Collectors.groupingBy(Employee::getStatus, Collectors.counting()));
     }
 }

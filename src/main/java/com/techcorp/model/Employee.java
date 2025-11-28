@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
 public class Employee {
+    private Long id;
+
     @NotBlank(message = "Imię i nazwisko jest wymagane")
     private String fullName;
 
@@ -43,6 +45,14 @@ public class Employee {
     public Employee() {
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getFullName() {
         return fullName;
     }
@@ -53,6 +63,10 @@ public class Employee {
 
     public String getEmail() {
         return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = Objects.requireNonNull(email, "email");
     }
 
     public String getCompanyName() {
